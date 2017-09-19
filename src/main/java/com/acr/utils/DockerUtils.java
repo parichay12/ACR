@@ -353,17 +353,17 @@ public class DockerUtils {
             System.out.println("Trying to setup Docker config: " + dockerHostIP);
             sshShell = SSHShell.open(dockerHostIP, 22, vmUserName, vmPassword);
 
-//            // Setup Docker daemon to allow connection from any Docker clients
-//            String output = sshShell.executeCommand("bash -c ~/.azuredocker/CREATE_DEFAULT_DOCKERD_OPTS_TLS_DISABLED.sh", true, true);
-//            System.out.println(output);
-//            dockerHostPort = "2375"; // Default Docker port when secured connection is disabled
-//            dockerHostTlsEnabled = false;
+            // Setup Docker daemon to allow connection from any Docker clients
+            String output = sshShell.executeCommand("bash -c ~/.azuredocker/CREATE_DEFAULT_DOCKERD_OPTS_TLS_DISABLED.sh", true, true);
+            System.out.println(output);
+           String dockerHostPort = "2375"; // Default Docker port when secured connection is disabled
+           dockerHostTlsEnabled = false;
 
             // Setup Docker daemon to allow connection from authorized Docker clients only
-            String output = sshShell.executeCommand("bash -c ~/.azuredocker/CREATE_DEFAULT_DOCKERD_OPTS_TLS_ENABLED.sh", true, true);
-            System.out.println(output);
-            String dockerHostPort = "2376"; // Default Docker port when secured connection is enabled
-            dockerHostTlsEnabled = true;
+      //      String output = sshShell.executeCommand("bash -c ~/.azuredocker/CREATE_DEFAULT_DOCKERD_OPTS_TLS_ENABLED.sh", true, true);
+     //       System.out.println(output);
+        //    String dockerHostPort = "2376"; // Default Docker port when secured connection is enabled
+         //   dockerHostTlsEnabled = true;
 
             dockerHostUrl = "tcp://" + dockerHostIP + ":" + dockerHostPort;
         } catch (JSchException jSchException) {

@@ -130,37 +130,8 @@ public class AcrServices {
             System.out.println("Creating an Azure Container Service with Kubernetes ochestration and one agent (virtual machine)");
 
             Date t1 = new Date();
-         /*   System.setProperty("http.proxyHost", "tmnoida1.techmahindra.com");
-            System.setProperty("http.proxyPort", "8080");
-            System.setProperty("http.nonProxyHosts", "localhost|localhost.localdomain|127.0.0.1|[::1]|INNOSDPC00076.TechMahindra.com|INNOSDPC00076|10.13.163.49|testregistry2808.azurecr.io");
-            
-           */
-            
-         // use adal to Authenticate
-           /* AuthenticationContext authContext = null;
-            AuthenticationResult authResult = null;
-            ExecutorService service = null;
-            String tenantId = "1f8d8d27-0ce8-4b2a-b987-3d28d3b029ee";
-
-            try {
-                service = Executors.newFixedThreadPool(1);
-                String url = "https://login.microsoftonline.com/" + tenantId + "/oauth2/authorize";
-                authContext = new AuthenticationContext(url,
-                                                        false,
-                                                        service);
-                    ClientCredential clientCred = new ClientCredential(clientId, secret);
-                    Future<AuthenticationResult>  future = authContext.acquireToken(
-                                                                    "https://management.azure.com/",
-                                                                    clientCred,
-                                                                    null);
-                authResult = future.get();
-            } catch (Exception ex) {
-                ex.getStackTrace();
-            } finally {
-                service.shutdown();
-            }*/
-
-            ContainerService azureContainerService = azure.containerServices().define(acsName)
+       
+         /*   ContainerService azureContainerService = azure.containerServices().define(acsName)
                     .withRegion(region)
                     .withNewResourceGroup(rgName)
                     .withKubernetesOrchestration()
@@ -179,13 +150,14 @@ public class AcrServices {
 
             Date t2 = new Date();
             System.out.println("Created Azure Container Service: (took " + ((t2.getTime() - t1.getTime()) / 1000) + " seconds) " + azureContainerService.id());
-            Utils.print(azureContainerService);
+            Utils.print(azureContainerService);*/
 
 
             //=============================================================
             // Create an Azure Container Registry to store and manage private Docker container images
 
             System.out.println("Creating an Azure Container Registry");
+            Date t2 = new Date();
 
             t1 = new Date();
 
@@ -283,28 +255,28 @@ public class AcrServices {
                     .withShowAll(true)
                     .exec();
             for (Container container : dockerContainers) {
-                System.out.format("\tFound Docker container %s (%s)\n", container.getImage(), container.getId());
+                System.out.println("\tFound Docker container \n"+container.getImage());
             }
 
 
             //=============================================================
             // Download the Kubernetes config file from one of the master virtual machines
 
-            azureContainerService = azure.containerServices().getByResourceGroup(rgName, acsName);
-            System.out.println("Found Kubernetes master at: " + azureContainerService.masterFqdn());
+           // azureContainerService = azure.containerServices().getByResourceGroup(rgName, acsName);
+          //  System.out.println("Found Kubernetes master at: " + azureContainerService.masterFqdn());
 
-            shell = SSHShell.open(azureContainerService.masterFqdn(), 22, rootUserName, sshKeys.getSshPrivateKey().getBytes());
+          //  shell = SSHShell.open(azureContainerService.masterFqdn(), 22, rootUserName, sshKeys.getSshPrivateKey().getBytes());
 
-            String kubeConfigContent = shell.download("config", ".kube", true);
+            /*String kubeConfigContent = shell.download("config", ".kube", true);
             System.out.println("Found Kubernetes config:\n" + kubeConfigContent);
-
+*/
 
             //=============================================================
             // Instantiate the Kubernetes client using the downloaded ".kube/config" file content
             //     The Kubernetes client API requires setting an environment variable pointing at a real file;
             //        we will create a temporary file that will be deleted automatically when the sample exits
 
-            File tempKubeConfigFile = File.createTempFile("kube", ".config", new File(System.getProperty("java.io.tmpdir")));
+           /* File tempKubeConfigFile = File.createTempFile("kube", ".config", new File(System.getProperty("java.io.tmpdir")));
             tempKubeConfigFile.deleteOnExit();
             BufferedWriter buffOut = new BufferedWriter(new FileWriter(tempKubeConfigFile));
             buffOut.write(kubeConfigContent);
@@ -312,19 +284,19 @@ public class AcrServices {
 
             System.setProperty(Config.KUBERNETES_KUBECONFIG_FILE, tempKubeConfigFile.getPath());
             Config config = new Config();
-            KubernetesClient kubernetesClient = new DefaultKubernetesClient(config);
+            KubernetesClient kubernetesClient = new DefaultKubernetesClient(config);*/
 
 
             //=============================================================
             // List all the nodes available in the Kubernetes cluster
 
-            System.out.println(kubernetesClient.nodes().list());
+           // System.out.println(kubernetesClient.nodes().list());
 
 
             //=============================================================
             // Create a namespace where all the sample Kubernetes resources will be created
 
-            Namespace ns = new NamespaceBuilder()
+           /* Namespace ns = new NamespaceBuilder()
                     .withNewMetadata()
                         .withName(acsNamespace)
                         .addToLabels("acr", "sample")
@@ -338,7 +310,7 @@ public class AcrServices {
             Thread.sleep(5000);
             for (Namespace namespace : kubernetesClient.namespaces().list().getItems()) {
                 System.out.println("\tFound Kubernetes namespace: " + namespace.toString());
-            }
+            }*/
 
 
             //=============================================================
@@ -362,19 +334,19 @@ public class AcrServices {
                     .withData(secretData)
                     .withType("kubernetes.io/dockercfg");
 
-            System.out.println("Creating new secret: " + kubernetesClient.secrets().inNamespace(acsNamespace).create(secretBuilder.build()));
+          //  System.out.println("Creating new secret: " + kubernetesClient.secrets().inNamespace(acsNamespace).create(secretBuilder.build()));
 
             Thread.sleep(5000);
 
-            for (Secret kubeS : kubernetesClient.secrets().inNamespace(acsNamespace).list().getItems()) {
+         /*   for (Secret kubeS : kubernetesClient.secrets().inNamespace(acsNamespace).list().getItems()) {
                 System.out.println("\tFound secret: " + kubeS);
             }
-
+*/
 
             //=============================================================
             // Create a replication controller for our image stored in the Azure Container Registry
 
-            ReplicationController rc = new ReplicationControllerBuilder()
+         /*   ReplicationController rc = new ReplicationControllerBuilder()
                     .withNewMetadata()
                         .withName("acrsample-rc")
                         .withNamespace(acsNamespace)
@@ -398,9 +370,9 @@ public class AcrServices {
                             .endSpec()
                         .endTemplate()
                     .endSpec()
-                    .build();
+                    .build();*/
 
-            System.out.println("Creating a replication controller: " + kubernetesClient.replicationControllers().inNamespace(acsNamespace).create(rc));
+          /*  System.out.println("Creating a replication controller: " + kubernetesClient.replicationControllers().inNamespace(acsNamespace).create(rc));
             Thread.sleep(5000);
 
             rc = kubernetesClient.replicationControllers().inNamespace(acsNamespace).withName("acrsample-rc").get();
@@ -408,13 +380,13 @@ public class AcrServices {
 
             for (Pod pod : kubernetesClient.pods().inNamespace(acsNamespace).list().getItems()) {
                 System.out.println("\tFound Kubernetes pods: " + pod.toString());
-            }
+            }*/
 
 
             //=============================================================
             // Create a Load Balancer service that will expose the service to the world
 
-            Service lbService = new ServiceBuilder()
+          /*  Service lbService = new ServiceBuilder()
                     .withNewMetadata()
                         .withName(acsLbIngressName)
                         .withNamespace(acsNamespace)
@@ -434,12 +406,12 @@ public class AcrServices {
             Thread.sleep(5000);
 
             System.out.println("\tFound service: " + kubernetesClient.services().inNamespace(acsNamespace).withName(acsLbIngressName).get());
-
+*/
 
             //=============================================================
             // Wait until the external IP becomes available
 
-            int timeout = 30 * 60 * 1000; // 30 minutes
+          /*  int timeout = 30 * 60 * 1000; // 30 minutes
             String matchIPV4 = "^(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}$";
 
             while (timeout > 0) {
@@ -460,9 +432,9 @@ public class AcrServices {
 
             // Clean-up
             kubernetesClient.namespaces().delete(ns);
-
-            shell.close();
-            shell = null;
+*/
+         //   shell.close();
+           // shell = null;
 
             return true;
         } catch (Exception f) {
@@ -493,9 +465,9 @@ public class AcrServices {
     public static void main(String[] args) {
         try {
                   	
-    		String client = "6fbb6583-f747-425e-a18b-c396cf322968";
+    		String client = "8bb36120-c684-4716-8f39-17455a059b6a";
 			String tenant = "1f8d8d27-0ce8-4b2a-b987-3d28d3b029ee";
-			String key = "7cbeo8TnzIJRY1n2nZVeazomDSFA6+dLxCjarVZEQ9E=";
+			String key = "t4pnv/SnuGBqAq2Mh5KsVjeVtrAtyv5zTEPYdbf2/PA=";
 			String subscriptionKey ="fc8fe922-741e-4861-b055-3ab1a9a61f4b";
 			String rgName ="";
 			String acrName ="";
